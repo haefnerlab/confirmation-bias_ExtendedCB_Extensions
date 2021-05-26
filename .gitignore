@@ -7,3 +7,14 @@
 *.err.txt
 *.out.txt
 *.sbatch
+*.npy
+*.pyc
+*.txt
+*.png
+*.pdf
+*.h5
+*.iml
+*.DS_Store
+*.sbatch
+*.err.txt
+*.out.txt
