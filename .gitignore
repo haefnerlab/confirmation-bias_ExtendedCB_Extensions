@@ -1,0 +1,9 @@
+*.mat
+*.m~
+*.png
+*.DS_Store
+*._*
+*.asv
+*.err.txt
+*.out.txt
+*.sbatch
