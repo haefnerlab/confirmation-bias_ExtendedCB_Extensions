@@ -1008,3 +1008,10 @@ ax.LineWidth=2;
 set(ax, 'box','off');
 ax.XAxis.FontSize = 20;
 ax.YAxis.FontSize = 20;
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+filename_save = strcat('SavedWorkspace/ShortLongFrames_',date,'.mat');
+save(filename_save);

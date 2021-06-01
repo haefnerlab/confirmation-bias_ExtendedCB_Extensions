@@ -139,7 +139,8 @@ for i=1:(num_sub)
     toc;
     disp('-----------------------------------------------------------------------------------------------------');
 end
-
+disp ('Clearing huge preload files....')
+clear_preload_huge_files;
 %%
 bin_num = 15;
 figure();
