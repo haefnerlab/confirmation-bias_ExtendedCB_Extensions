@@ -567,3 +567,11 @@ axis('tight')
 xlabel('Ratio');
 ylabel('Percent chose left for ratio stimulus');
 
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+filename_save = strcat('SavedWorkspace/ShortLongFrames_NoiseRatio_',date,'.mat');
+save(filename_save);
