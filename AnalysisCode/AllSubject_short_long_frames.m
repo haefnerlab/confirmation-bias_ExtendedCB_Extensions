@@ -69,7 +69,12 @@ for i=1:(num_sub)
             best_hprs = best_hprs_long;
             disp(['Starting analysis for LONG FRAMES data of Subject ' num2str(i) ' ...']);
         end
-        [params_boot,sobl,abbl_exp,trials,bin_centers,~,~,data,frame_signals,sobl_time_locked,log_bernoulli{i,j}] = run_analysis_noise_only(subjects{i,j}, expt_type, time(j), boots, best_hprs, standardize, dir);
+        [params_boot,params_boot_first_half,params_boot_second_half,...
+            sobl,sobl_first_half,sobl_second_half,...
+            abbl_exp,abbl_exp_first_half,abbl_exp_second_half,...
+            trials,bin_centers,~,~,data,frame_signals,...
+            sobl_time_locked,sobl_time_locked_first_half,sobl_time_locked_second_half,...
+            log_bernoulli{i,j}] = run_analysis_noise_only(subjects{i,j}, expt_type, time(j), boots, best_hprs, standardize, dir);
         %         alpha(i,j,:) = [prctile(params_boot(:, end).^2, 50) std(params_boot(:, end).^2)];
         alpha(i,j,:) = [prctile(1e-4+(1-1e-4) * sigmoid(params_boot(:,end)), 50) std(1e-4+(1-1e-4) * sigmoid(params_boot(:,end)))/sqrt(size(params_boot,1))];
         bias(i,j) = prctile(params_boot(:, end-1), 50);
@@ -94,6 +99,40 @@ for i=1:(num_sub)
         hprs_used(i,j,:) = best_hprs;
         data_sub{i,j} = data;
         frame_signals_sub{i,j} = frame_signals;
+        
+        temporal_kernel_first_half(i,j,:) = prctile(params_boot_first_half(:, 1:num_frames), 50);
+        norm_temporal_kernel_first_half(i,j,:) = temporal_kernel_first_half(i,j,:)/mean(temporal_kernel_first_half(i,j,:));
+        lo_temporal_kernel_first_half(i,j,:) = prctile(params_boot_first_half(:, 1:num_frames), 50) - prctile(params_boot_first_half(:, 1:num_frames), 16);
+        hi_temporal_kernel_first_half(i,j,:) = prctile(params_boot_first_half(:, 1:num_frames), 84) - prctile(params_boot_first_half(:, 1:num_frames), 50);
+        
+        all_linear_first_half(i,j,:,:) = sobl_first_half;
+        norm_all_linear_first_half(i,j,:,:) = [sobl_first_half(:,1)/mean(temporal_kernel_first_half(i,j,:)) sobl_first_half(:,2)/mean(temporal_kernel_first_half(i,j,:)) sobl_first_half(:,3) sobl_first_half(:,4)];
+        norm_all_linear_time_locked_first_half(i,j,:,:) = [sobl_time_locked_first_half(:,1)/mean(temporal_kernel_first_half(i,j,:)) sobl_time_locked_first_half(:,2)/mean(temporal_kernel_first_half(i,j,:)) sobl_time_locked_first_half(:,3) sobl_time_locked_first_half(:,4)];%sobl_norm;
+        all_linear_time_locked_first_half(i,j,:,:) = sobl_time_locked_first_half;
+        slope_first_half(i,j) = prctile(squeeze(all_linear_first_half(i,j,:,1)),50);
+        slope_all_first_half(i,j,:) = sobl_first_half(:,1);
+        norm_slope_all_first_half(i,j,:) = norm_all_linear_first_half(i,j,:,1);
+        norm_slope_all_time_locked_first_half(i,j,:) = norm_all_linear_time_locked_first_half(i,j,:,1);
+        norm_slope_first_half(i,j) = prctile(squeeze(norm_all_linear_first_half(i,j,:,1)),50);
+        norm_slope_time_locked_first_half(i,j) = prctile(squeeze(norm_all_linear_time_locked_first_half(i,j,:,1)),50);
+        
+        
+        temporal_kernel_second_half(i,j,:) = prctile(params_boot_second_half(:, 1:num_frames), 50);
+        norm_temporal_kernel_second_half(i,j,:) = temporal_kernel_second_half(i,j,:)/mean(temporal_kernel_second_half(i,j,:));
+        lo_temporal_kernel_second_half(i,j,:) = prctile(params_boot_second_half(:, 1:num_frames), 50) - prctile(params_boot_second_half(:, 1:num_frames), 16);
+        hi_temporal_kernel_second_half(i,j,:) = prctile(params_boot_second_half(:, 1:num_frames), 84) - prctile(params_boot_second_half(:, 1:num_frames), 50);
+        
+        all_linear_second_half(i,j,:,:) = sobl_second_half;
+        norm_all_linear_second_half(i,j,:,:) = [sobl_second_half(:,1)/mean(temporal_kernel_second_half(i,j,:)) sobl_second_half(:,2)/mean(temporal_kernel_second_half(i,j,:)) sobl_second_half(:,3) sobl_second_half(:,4)];
+        norm_all_linear_time_locked_second_half(i,j,:,:) = [sobl_time_locked_second_half(:,1)/mean(temporal_kernel_second_half(i,j,:)) sobl_time_locked_second_half(:,2)/mean(temporal_kernel_second_half(i,j,:)) sobl_time_locked_second_half(:,3) sobl_time_locked_second_half(:,4)];%sobl_norm;
+        all_linear_time_locked_second_half(i,j,:,:) = sobl_time_locked_second_half;
+        slope_second_half(i,j) = prctile(squeeze(all_linear_second_half(i,j,:,1)),50);
+        slope_all_second_half(i,j,:) = sobl_second_half(:,1);
+        norm_slope_all_second_half(i,j,:) = norm_all_linear_second_half(i,j,:,1);
+        norm_slope_all_time_locked_second_half(i,j,:) = norm_all_linear_time_locked_second_half(i,j,:,1);
+        norm_slope_second_half(i,j) = prctile(squeeze(norm_all_linear_second_half(i,j,:,1)),50);
+        norm_slope_time_locked_second_half(i,j) = prctile(squeeze(norm_all_linear_time_locked_second_half(i,j,:,1)),50);
+        
         
         subplot(cases,3,1+3*(j-1))
         plot((1:length(data.noise)), data.noise);
@@ -786,7 +825,7 @@ time(1) = 1/24;
 time(2) = 1/6;
 axis image
 subaxis(2,4,1, 'Spacing', 0.025, 'Padding', 0.025, 'Margin', 0.075);
-for i=1:(num_sub-1)
+for i=1:(num_sub)
     plot(1:num_frames,squeeze(norm_temporal_kernel(i,1,1:num_frames)),'m');
     hold on;
     plot(1:num_frames,squeeze(norm_temporal_kernel(i,2,1:num_frames)),'c');
@@ -1009,9 +1048,166 @@ set(ax, 'box','off');
 ax.XAxis.FontSize = 20;
 ax.YAxis.FontSize = 20;
 
+%% first half second half comparison for short frame trials
+figure(num_sub+7)
+time(1) = 1/24;
+time(2) = 1/6;
+axis image
+subaxis(1,2,1, 'Spacing', 0.025, 'Padding', 0.025, 'Margin', 0.075);
+for i=1:(num_sub)
+    plot(1:num_frames,squeeze(norm_temporal_kernel_first_half(i,1,1:num_frames)),'r');
+    hold on;
+    plot(1:num_frames,squeeze(norm_temporal_kernel_first_half(i,1,1:num_frames)),'b');
+    hold on;
+end
+hold('on');
+xlabel('Frames','FontSize',20);
+ylabel('Weights','FontSize',20);
+hold('on');
+plot(1:num_frames,mean(squeeze((norm_temporal_kernel_first_half(:,1,1:num_frames))),1),'-or','LineWidth',2);
+hold on;
+hold('on');
+plot(1:num_frames,mean(squeeze((norm_temporal_kernel_second_half(:,1,1:num_frames))),1),'-ob','LineWidth',2);
+hold('on');
+hold on;
+plot(1:num_frames,zeros(1,num_frames),'k','LineWidth',2);
+legend ({['Short frame first half'] ['Short frame second frame']},'Box','off','Fontsize',10);
+axis('tight');
+xticks([1 : 1:num_frames])
+a = get(gca,'XTickLabel');
+set(gca,'fontsize',18)
+b = get(gca,'YTickLabel');
+set(gca,'fontsize',18)
+ax = gca;
+ax.LineWidth=2;
+set(ax, 'box','off');
+ax.XAxis.FontSize = 20;
+ax.YAxis.FontSize = 20;
+
+subaxis(1,2,2, 'Spacing', 0.025, 'Padding', 0.025, 'Margin', 0.075);
+scatter(norm_slope_first_half(:,1),norm_slope_second_half(:,1),50,'k','filled');
+for sb=1:num_sub
+    mn1(sb) = mean(squeeze(norm_slope_all_first_half(sb,1,:)));
+    mn2(sb) = mean(squeeze(norm_slope_all_second_half(sb,1,:)));
+    v1(sb) = (std(squeeze(norm_slope_all_first_half(sb,1,:)))/sqrt(size(norm_slope_all_first_half,3)))^2;%var(squeeze(norm_slope_all(sb,1,:)));
+    v2(sb) = (std(squeeze(norm_slope_all_second_half(sb,1,:)))/sqrt(size(norm_slope_all_second_half,3)))^2;%var(squeeze(norm_slope_all(sb,2,:)));
+    l1(sb) = prctile(squeeze(norm_slope_all_first_half(sb,1,:)),50)-prctile(squeeze(norm_slope_all_first_half(sb,1,:)),16);
+    h1(sb) = prctile(squeeze(norm_slope_all_first_half(sb,1,:)),84)-prctile(squeeze(norm_slope_all_first_half(sb,1,:)),50);
+    l2(sb) = prctile(squeeze(norm_slope_all_second_half(sb,1,:)),50)-prctile(squeeze(norm_slope_all_second_half(sb,1,:)),16);
+    h2(sb) = prctile(squeeze(norm_slope_all_second_half(sb,1,:)),84)-prctile(squeeze(norm_slope_all_second_half(sb,1,:)),50);
+end
+hold on;
+eb(1) = errorbar(norm_slope_first_half(:,1), norm_slope_second_half(:,1), l1, h1, 'horizontal', 'LineStyle', 'none');
+eb(2) = errorbar(norm_slope_first_half(:,1), norm_slope_second_half(:,1), l2, h2, 'vertical', 'LineStyle', 'none');
+set(eb(1), 'color', 'r', 'LineWidth', 2)
+set(eb(2), 'color', 'b', 'LineWidth', 2)
+mn_s = min(min([norm_slope_first_half(:,1)-l1 norm_slope_second_half(:,1)-l2]));
+mx_s = max(max([norm_slope_first_half(:,1)+h1 norm_slope_second_half(:,1)+h2]));
+hold on;
+plot(linspace(mn_s,mx_s,10),linspace(mn_s,mx_s,10),'k','LineWidth',2);
+hold on;
+scatter(norm_slope_first_half(:,1),norm_slope_second_half(:,1),50,'k','filled')
+mn_slp1 = ((1./v1)./sum(1./v1)) .* norm_slope_first_half(:,1)';
+mn_slp2 = ((1./v2)./sum(1./v2)) .* norm_slope_second_half(:,1)';
+scatter(sum(mn_slp1),sum(mn_slp2),200,'g','filled');
+xlabel('Slopes for Short Frame First Half','FontSize',20);
+ylabel('Slopes for Short Frame Second Half','FontSize',20);
+hold('on');
+hold('on');
+axis('tight');
+get(gca,'XTickLabel');
+set(gca,'fontsize',18)
+get(gca,'YTickLabel');
+set(gca,'fontsize',18)
+ax = gca;
+ax.LineWidth=2;
+set(ax, 'box','off');
+ax.XAxis.FontSize = 20;
+ax.YAxis.FontSize = 20;
 
 
 
+%% first and second half comparison for long frame trials
+figure(num_sub+8)
+time(1) = 1/24;
+time(2) = 1/6;
+axis image
+subaxis(1,2,1, 'Spacing', 0.025, 'Padding', 0.025, 'Margin', 0.075);
+for i=1:(num_sub)
+    plot(1:num_frames,squeeze(norm_temporal_kernel_first_half(i,2,1:num_frames)),'r');
+    hold on;
+    plot(1:num_frames,squeeze(norm_temporal_kernel_first_half(i,2,1:num_frames)),'b');
+    hold on;
+end
+hold('on');
+xlabel('Frames','FontSize',20);
+ylabel('Weights','FontSize',20);
+hold('on');
+plot(1:num_frames,mean(squeeze((norm_temporal_kernel_first_half(:,2,1:num_frames))),1),'-or','LineWidth',2);
+hold on;
+hold('on');
+plot(1:num_frames,mean(squeeze((norm_temporal_kernel_second_half(:,2,1:num_frames))),1),'-ob','LineWidth',2);
+hold('on');
+hold on;
+plot(1:num_frames,zeros(1,num_frames),'k','LineWidth',2);
+legend ({['Long frame first half'] ['Long frame second frame']},'Box','off','Fontsize',10);
+axis('tight');
+xticks([1 : 1:num_frames])
+a = get(gca,'XTickLabel');
+set(gca,'fontsize',18)
+b = get(gca,'YTickLabel');
+set(gca,'fontsize',18)
+ax = gca;
+ax.LineWidth=2;
+set(ax, 'box','off');
+ax.XAxis.FontSize = 20;
+ax.YAxis.FontSize = 20;
+
+subaxis(1,2,2, 'Spacing', 0.025, 'Padding', 0.025, 'Margin', 0.075);
+scatter(norm_slope_first_half(:,2),norm_slope_second_half(:,2),50,'k','filled');
+for sb=1:num_sub
+    mn1(sb) = mean(squeeze(norm_slope_all_first_half(sb,2,:)));
+    mn2(sb) = mean(squeeze(norm_slope_all_second_half(sb,2,:)));
+    v1(sb) = (std(squeeze(norm_slope_all_first_half(sb,2,:)))/sqrt(size(norm_slope_all_first_half,3)))^2;%var(squeeze(norm_slope_all(sb,1,:)));
+    v2(sb) = (std(squeeze(norm_slope_all_second_half(sb,2,:)))/sqrt(size(norm_slope_all_second_half,3)))^2;%var(squeeze(norm_slope_all(sb,2,:)));
+    l1(sb) = prctile(squeeze(norm_slope_all_first_half(sb,2,:)),50)-prctile(squeeze(norm_slope_all_first_half(sb,2,:)),16);
+    h1(sb) = prctile(squeeze(norm_slope_all_first_half(sb,2,:)),84)-prctile(squeeze(norm_slope_all_first_half(sb,2,:)),50);
+    l2(sb) = prctile(squeeze(norm_slope_all_second_half(sb,2,:)),50)-prctile(squeeze(norm_slope_all_second_half(sb,2,:)),16);
+    h2(sb) = prctile(squeeze(norm_slope_all_second_half(sb,2,:)),84)-prctile(squeeze(norm_slope_all_second_half(sb,2,:)),50);
+end
+hold on;
+eb(1) = errorbar(norm_slope_first_half(:,2), norm_slope_second_half(:,2), l1, h1, 'horizontal', 'LineStyle', 'none');
+eb(2) = errorbar(norm_slope_first_half(:,2), norm_slope_second_half(:,2), l2, h2, 'vertical', 'LineStyle', 'none');
+set(eb(1), 'color', 'r', 'LineWidth', 2)
+set(eb(2), 'color', 'b', 'LineWidth', 2)
+mn_s = min(min([norm_slope_first_half(:,2)-l1 norm_slope_second_half(:,2)-l2]));
+mx_s = max(max([norm_slope_first_half(:,2)+h1 norm_slope_second_half(:,2)+h2]));
+hold on;
+plot(linspace(mn_s,mx_s,10),linspace(mn_s,mx_s,10),'k','LineWidth',2);
+hold on;
+scatter(norm_slope_first_half(:,2),norm_slope_second_half(:,2),50,'k','filled')
+mn_slp1 = ((1./v1)./sum(1./v1)) .* norm_slope_first_half(:,2)';
+mn_slp2 = ((1./v2)./sum(1./v2)) .* norm_slope_second_half(:,2)';
+scatter(sum(mn_slp1),sum(mn_slp2),200,'g','filled');
+xlabel('Slopes for Long Frame First Half','FontSize',20);
+ylabel('Slopes for Long Frame Second Half','FontSize',20);
+hold('on');
+hold('on');
+axis('tight');
+get(gca,'XTickLabel');
+set(gca,'fontsize',18)
+get(gca,'YTickLabel');
+set(gca,'fontsize',18)
+ax = gca;
+ax.LineWidth=2;
+set(ax, 'box','off');
+ax.XAxis.FontSize = 20;
+ax.YAxis.FontSize = 20;
+
+
+
+%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+close all;
 filename_save = strcat('SavedWorkspace/ShortLongFrames_',date,'.mat');
 save(filename_save);

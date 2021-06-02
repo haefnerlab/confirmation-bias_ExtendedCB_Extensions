@@ -1,4 +1,9 @@
-function [params_boot,sobl,abbl,trials,bin_centers,means,stderrs,data,frame_signals,sobl_time_locked,log_bernoulli] = run_analysis_noise_only(subjectID, expt_type, time, boot_n, best_hprs, standardize, dir)
+function [params_boot,params_boot_first_half,params_boot_second_half,...
+    sobl,sobl_first_half,sobl_second_half,...
+    abbl,abbl_first_half,abbl_second_half,...
+    trials,bin_centers,means,stderrs,data,frame_signals,...
+    sobl_time_locked,sobl_time_locked_first_half,sobl_time_locked_second_half,...
+    log_bernoulli] = run_analysis_noise_only(subjectID, expt_type, time, boot_n, best_hprs, standardize, dir)
 
 % initialize
 datadir = fullfile(pwd, dir);
@@ -13,6 +18,12 @@ end
 signal_raw = [];
 choice_raw = [];
 noises = [];
+signal_raw_first_half = [];
+choice_raw_first_half = [];
+noises_first_half = [];
+signal_raw_second_half = [];
+choice_raw_second_half = [];
+noises_second_half = [];
 filename = [datadir '/' subjectID exp];
 frame_signal_filename = [filename '.mat'];
 if exist(frame_signal_filename)
@@ -26,11 +37,21 @@ else
     [frame_signals] = ComputeFrameSignals(data,0);
     save(filename, 'frame_signals');
 end
+mark_half = floor(length(data.choice)/2);
 
 for k = 1:length(data.choice)
     noises = [noises data.noise(k)];
     signal_raw = [signal_raw; frame_signals(k, :)];
     choice_raw = [choice_raw data.choice(k)];
+    if k<=mark_half
+        noises_first_half = [noises_first_half data.noise(k)];
+        signal_raw_first_half = [signal_raw_first_half; frame_signals(k, :)];
+        choice_raw_first_half = [choice_raw_first_half data.choice(k)];
+    else
+        noises_second_half = [noises_second_half data.noise(k)];
+        signal_raw_second_half = [signal_raw_second_half; frame_signals(k, :)];
+        choice_raw_second_half = [choice_raw_second_half data.choice(k)];
+    end
 end
 trials = size(choice_raw, 2);
 disp('Preprocessing of data completed!');
@@ -39,10 +60,23 @@ for j = 1:boot_n
         disp(['Completed ' num2str(j) '/' num2str(boot_n) ' iterations...']);
     end
     [signal, choice] = bootstrap(signal_raw, choice_raw, trials);
+    [signal_first_half, choice_first_half] = bootstrap(signal_raw_first_half, choice_raw_first_half, mark_half);
+    [signal_second_half, choice_second_half] = bootstrap(signal_raw_second_half, choice_raw_second_half, (trials-mark_half));
+    
     [sobl(j,:), ~] = CustomRegression.LinearPK_with_lapse(signal, choice, standardize);
     [sobl_time_locked(j,:), ~] = CustomRegression.LinearPK_with_lapse_time_locked(signal, choice, time, standardize);
     [params_boot(j,:), ~, ~, ~, ~, ~] = CustomRegression.PsychophysicalKernelwithlapseSabya(signal, choice, best_hprs(1), best_hprs(2), best_hprs(3), standardize);
     [abbl(j,:), ~, ~] = CustomRegression.ExponentialPK_with_lapse(signal, choice, standardize);
+
+    [sobl_first_half(j,:), ~] = CustomRegression.LinearPK_with_lapse(signal_first_half, choice_first_half, standardize);
+    [sobl_time_locked_first_half(j,:), ~] = CustomRegression.LinearPK_with_lapse_time_locked(signal_first_half, choice_first_half, time, standardize);
+    [params_boot_first_half(j,:), ~, ~, ~, ~, ~] = CustomRegression.PsychophysicalKernelwithlapseSabya(signal_first_half, choice_first_half, best_hprs(1), best_hprs(2), best_hprs(3), standardize);
+    [abbl_first_half(j,:), ~, ~] = CustomRegression.ExponentialPK_with_lapse(signal_first_half, choice_first_half, standardize);
+
+    [sobl_second_half(j,:), ~] = CustomRegression.LinearPK_with_lapse(signal_second_half, choice_second_half, standardize);
+    [sobl_time_locked_second_half(j,:), ~] = CustomRegression.LinearPK_with_lapse_time_locked(signal_second_half, choice_second_half, time, standardize);
+    [params_boot_second_half(j,:), ~, ~, ~, ~, ~] = CustomRegression.PsychophysicalKernelwithlapseSabya(signal_second_half, choice_second_half, best_hprs(1), best_hprs(2), best_hprs(3), standardize);
+    [abbl_second_half(j,:), ~, ~] = CustomRegression.ExponentialPK_with_lapse(signal_second_half, choice_second_half, standardize);
 end
 all_frames = size(signal_raw,2);
 temporal_kernel = prctile(params_boot(:, 1:all_frames), 50);
