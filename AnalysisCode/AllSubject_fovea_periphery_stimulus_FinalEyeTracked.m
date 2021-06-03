@@ -65,7 +65,7 @@ for i=1:(num_sub)
         if j==1
             disp(['Starting analysis for FOVEAL data of Subject ' num2str(i) ' ...']);
             best_hprs = best_hprs_fovea;
-            [params_boot,sobl,abbl_exp,trials,bin_centers,~,~,data,frame_signals,sobl_time_locked,log_bernoulli_sub{i,j}] = run_analysis_noise_only(subjects{i,j},expt_type,time(j),boots,best_hprs,standardize,dir);
+            [params_boot,~,~,sobl,~,~,abbl_exp,~,~,trials,bin_centers,~,~,data,frame_signals,sobl_time_locked,~,~,log_bernoulli_sub{i,j}] = run_analysis_noise_only(subjects{i,j},expt_type,time(j),boots,best_hprs,standardize,dir);
         else
             disp(['Starting analysis for PERIPHERAL data of Subject ' num2str(i) ' ...']);
             best_hprs = best_hprs_periphery;
@@ -139,6 +139,7 @@ for i=1:(num_sub)
     toc;
     disp('-----------------------------------------------------------------------------------------------------');
 end
+
 disp ('Clearing huge preload files....')
 clear_preload_huge_files;
 %%
@@ -917,3 +918,11 @@ set(ax, 'box','off');
 ax.XAxis.FontSize = 20;
 ax.YAxis.FontSize = 20;
 
+
+
+%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+close all;
+filename_save = strcat('SavedWorkspace/FoveaPeripheryEyeTracked_',date,'.mat');
+save(filename_save);

@@ -61,11 +61,11 @@ for i=1:(num_sub)
         if j==1
             disp(['Starting analysis for SMALL STIMULUS data of Subject ' num2str(i) ' ...']);
             best_hprs = best_hprs_small;
-            [params_boot,sobl,abbl_exp,trials,bin_centers,~,~,data,frame_signals,sobl_time_locked,log_bernoulli_sub{i,j}] = run_analysis_noise_only(subjects{i,j},expt_type,time(j),boots,best_hprs,standardize,dir);
+            [params_boot,~,~,sobl,~,~,abbl_exp,~,~,trials,bin_centers,~,~,data,frame_signals,sobl_time_locked,~,~,log_bernoulli_sub{i,j}] = run_analysis_noise_only(subjects{i,j},expt_type,time(j),boots,best_hprs,standardize,dir);
         else
             disp(['Starting analysis for BIG STIMULUS data of Subject ' num2str(i) ' ...']);
             best_hprs = best_hprs_big;
-            [params_boot,sobl,abbl_exp,trials,bin_centers,~,~,data,frame_signals,sobl_time_locked,log_bernoulli_sub{i,j}] = run_analysis_noise_only(subjects{i,j},expt_type,time(j),boots,best_hprs,standardize,dir);
+            [params_boot,~,~,sobl,~,~,abbl_exp,~,~,trials,bin_centers,~,~,data,frame_signals,sobl_time_locked,~,~,log_bernoulli_sub{i,j}] = run_analysis_noise_only(subjects{i,j},expt_type,time(j),boots,best_hprs,standardize,dir);
         end
         %         alpha(i,j,:) = [prctile(params_boot(:, end).^2, 50) std(params_boot(:, end).^2)];
         alpha(i,j,:) = [prctile(1e-4+(1-1e-4) * sigmoid(params_boot(:,end)), 50) std(1e-4+(1-1e-4) * sigmoid(params_boot(:,end)))/sqrt(size(params_boot,1))];
@@ -913,4 +913,10 @@ ax.XAxis.FontSize = 20;
 ax.YAxis.FontSize = 20;
 
 
+%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+close all;
+filename_save = strcat('SavedWorkspace/SmallBig_',date,'.mat');
+save(filename_save);
 
