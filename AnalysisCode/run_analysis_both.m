@@ -26,7 +26,7 @@ else
     [frame_signals, ~, ~] = ComputeFrameSignals(data, 0);
     save(filename, 'frame_signals');
 end
-
+data.ideal_frame_signals = frame_signals;
 if (expt_type == 2)
     for k = 1:length(data.choice)
         signal_raw = [signal_raw; frame_signals(k, :)];

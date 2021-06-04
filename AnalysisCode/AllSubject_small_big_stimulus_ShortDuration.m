@@ -135,7 +135,68 @@ for i=1:(num_sub)
     toc;
     disp('-----------------------------------------------------------------------------------------------------');
 end
+%%
+figure()
+j=1;
+for i=1:num_sub
+    subplot(2,5,i)
+    bins = 10;
+    subject_pm_curve =[];
+    uniq_vals = linspace(-0.8,0.8,bins);
+    tr_kappa = data_sub{i,j}.sign_noise;
+    noise_signal = data_sub{i,j}.ideal_frame_signals;
+    for tt=1:(length(uniq_vals)-1)
+        subj_resp(i,j,tt) = mean(data_sub{i,j}.choice(tr_kappa>uniq_vals(tt)&tr_kappa<=uniq_vals(tt+1)));
+        ntrial_subj(i,j,tt) = sum(tr_kappa>uniq_vals(tt)&tr_kappa<=uniq_vals(tt+1));
+    end
+    vals = uniq_vals(1:end-1) + (uniq_vals(2) - uniq_vals(1))/2;
+    errorbar(vals,squeeze(subj_resp(i,j,:)),squeeze((subj_resp(i,j,:)).*(1-subj_resp(i,j,:))./sqrt(ntrial_subj(i,j,:))),'ob','Linestyle','none','linewidth',2);
+    subject_pm_curve = (1./(1+exp(-(noise_signal*squeeze(temporal_kernel(i,j,:))+bias(i,j)))))*( 1-(alpha(i,j,1)))+(alpha(i,j,1)/2);
+    for tt=1:(length(uniq_vals)-1)
+        subj_resp_pred(i,j,tt) = mean(subject_pm_curve(((tr_kappa>uniq_vals(tt)&tr_kappa<=uniq_vals(tt+1)))));
+        ntrial_subj_pred(i,j,tt) = sum(tr_kappa>uniq_vals(tt)&tr_kappa<=uniq_vals(tt+1));
+    end
+    hold on;
+    plot(vals,squeeze(subj_resp_pred(i,j,:)),'r','Linewidth',2);
+    yline(0.5,'--k');
+    xline(0.0,'--k');
+    xlabel('Signed Kappa');
+    ylabel('Percent chose left');
+    xlim([-0.8 0.8])
+    ylim([0.0 1.0])
+end
+sgtitle('Response predicted by fitted weights to real data for small stimuli','fontsize',30)
 
+figure()
+j=2;
+for i=1:num_sub
+    subplot(2,5,i)
+    bins = 10;
+    subject_pm_curve =[];
+    uniq_vals = linspace(-0.8,0.8,bins);
+    tr_kappa = data_sub{i,j}.sign_noise;
+    noise_signal = data_sub{i,j}.ideal_frame_signals;
+    for tt=1:(length(uniq_vals)-1)
+        subj_resp(i,j,tt) = mean(data_sub{i,j}.choice(tr_kappa>uniq_vals(tt)&tr_kappa<=uniq_vals(tt+1)));
+        ntrial_subj(i,j,tt) = sum(tr_kappa>uniq_vals(tt)&tr_kappa<=uniq_vals(tt+1));
+    end
+    vals = uniq_vals(1:end-1) + (uniq_vals(2) - uniq_vals(1))/2;
+    errorbar(vals,squeeze(subj_resp(i,j,:)),squeeze((subj_resp(i,j,:)).*(1-subj_resp(i,j,:))./sqrt(ntrial_subj(i,j,:))),'ob','Linestyle','none','linewidth',2);
+    subject_pm_curve = (1./(1+exp(-(noise_signal*squeeze(temporal_kernel(i,j,:))+bias(i,j)))))*( 1-(alpha(i,j,1)))+(alpha(i,j,1)/2);
+    for tt=1:(length(uniq_vals)-1)
+        subj_resp_pred(i,j,tt) = mean(subject_pm_curve(((tr_kappa>uniq_vals(tt)&tr_kappa<=uniq_vals(tt+1)))));
+        ntrial_subj_pred(i,j,tt) = sum(tr_kappa>uniq_vals(tt)&tr_kappa<=uniq_vals(tt+1));
+    end
+    hold on;
+    plot(vals,squeeze(subj_resp_pred(i,j,:)),'r','Linewidth',2);
+    yline(0.5,'--k');
+    xline(0.0,'--k');
+    xlabel('Signed Kappa');
+    ylabel('Percent chose left');
+    xlim([-0.8 0.8])
+    ylim([0.0 1.0])
+end
+sgtitle('Response predicted by fitted weights to real data for big stimuli','fontsize',30)
 %%
 bin_num = 15;
 figure();
@@ -557,7 +618,7 @@ plot(1:num_frames,mean(squeeze((norm_temporal_kernel(:,2,1:num_frames))),1),'g',
 title('Big Stimulus Norm Weights')
 hold('on');
 axis('tight')
- 
+
 ax3 = subplot(2,4,3);
 for i=1:(num_sub)
     plot((1:2),norm_slope(i,:),'-ok','LineWidth',2);

@@ -89,7 +89,9 @@ for i=1:(num_sub)
         norm_slope_all(i,j,:) = norm_all_linear(i,j,:,1);
         norm_slope(i,j) = prctile(squeeze(norm_all_linear(i,j,:,1)),50);
         hprs_used(i,j,:) = best_hprs;
-        data_sub{i,j} = data;
+        data_sub{i,j}.choice = data.choice;
+        data_sub{i,j}.sign_noise = data.sign_noise;
+        data_sub{i,j}.ideal_frame_signals = data.ideal_frame_signals;
         rng1 = -50;
         rng2 = 50;
         
@@ -134,7 +136,7 @@ for i=1:(num_sub)
         xlim([-0.8 0.8])
         ylim([0.0 1.0])
     end
-    sgtitle(['Top Row: Foveal Frames and Bottom Row: Peripheral Frames for Subject ' num2str(i)])
+    sgtitle(['Top Row: Foveal Frames and Bottom Row: Peripheral Frames for Subject ' num2str(i)],'fontsize',30);
     disp(['All analysis complete for Subject ' num2str(i) ' !!!!']);
     toc;
     disp('-----------------------------------------------------------------------------------------------------');
@@ -142,6 +144,72 @@ end
 
 disp ('Clearing huge preload files....')
 clear_preload_huge_files;
+
+%%
+figure()
+j=1;
+for i=1:num_sub
+    subplot(2,5,i)
+    bins = 10;
+    subject_pm_curve =[];
+    uniq_vals = linspace(-0.8,0.8,bins);
+    tr_kappa = data_sub{i,j}.sign_noise;
+    noise_signal = data_sub{i,j}.ideal_frame_signals;
+    for tt=1:(length(uniq_vals)-1)
+        subj_resp(i,j,tt) = mean(data_sub{i,j}.choice(tr_kappa>uniq_vals(tt)&tr_kappa<=uniq_vals(tt+1)));
+        ntrial_subj(i,j,tt) = sum(tr_kappa>uniq_vals(tt)&tr_kappa<=uniq_vals(tt+1));
+    end
+    vals = uniq_vals(1:end-1) + (uniq_vals(2) - uniq_vals(1))/2;
+    errorbar(vals,squeeze(subj_resp(i,j,:)),squeeze((subj_resp(i,j,:)).*(1-subj_resp(i,j,:))./sqrt(ntrial_subj(i,j,:))),'ob','Linestyle','none','linewidth',2);
+    subject_pm_curve = (1./(1+exp(-(noise_signal*squeeze(temporal_kernel(i,j,:))+bias(i,j)))))*( 1-(alpha(i,j,1)))+(alpha(i,j,1)/2);
+    for tt=1:(length(uniq_vals)-1)
+        subj_resp_pred(i,j,tt) = mean(subject_pm_curve(((tr_kappa>uniq_vals(tt)&tr_kappa<=uniq_vals(tt+1)))));
+        ntrial_subj_pred(i,j,tt) = sum(tr_kappa>uniq_vals(tt)&tr_kappa<=uniq_vals(tt+1));
+    end
+    hold on;
+    err = sqrt(squeeze(subj_resp_pred(i,j,:)).*(1-squeeze(subj_resp_pred(i,j,:)))./squeeze(ntrial_subj(i,j,:)));
+    errorbar(vals,squeeze(subj_resp_pred(i,j,:)),err,'-or','Linewidth',2);
+    yline(0.5,'--k');
+    xline(0.0,'--k');
+    xlabel('Signed Kappa');
+    ylabel('Percent chose left');
+    xlim([-0.8 0.8])
+    ylim([0.0 1.0])
+end
+sgtitle('Response predicted by fitted weights to real data for foveal stimuli','fontsize',30);
+
+figure()
+j=2;
+for i=1:num_sub
+    subplot(2,5,i)
+    bins = 10;
+    subject_pm_curve =[];
+    uniq_vals = linspace(-0.8,0.8,bins);
+    tr_kappa = data_sub{i,j}.sign_noise;
+    noise_signal = data_sub{i,j}.ideal_frame_signals;
+    for tt=1:(length(uniq_vals)-1)
+        subj_resp(i,j,tt) = mean(data_sub{i,j}.choice(tr_kappa>uniq_vals(tt)&tr_kappa<=uniq_vals(tt+1)));
+        ntrial_subj(i,j,tt) = sum(tr_kappa>uniq_vals(tt)&tr_kappa<=uniq_vals(tt+1));
+    end
+    vals = uniq_vals(1:end-1) + (uniq_vals(2) - uniq_vals(1))/2;
+    errorbar(vals,squeeze(subj_resp(i,j,:)),squeeze((subj_resp(i,j,:)).*(1-subj_resp(i,j,:))./sqrt(ntrial_subj(i,j,:))),'ob','Linestyle','none','linewidth',2);
+    subject_pm_curve = (1./(1+exp(-(noise_signal*squeeze(temporal_kernel(i,j,:))+bias(i,j)))))*( 1-(alpha(i,j,1)))+(alpha(i,j,1)/2);
+    for tt=1:(length(uniq_vals)-1)
+        subj_resp_pred(i,j,tt) = mean(subject_pm_curve(((tr_kappa>uniq_vals(tt)&tr_kappa<=uniq_vals(tt+1)))));
+        ntrial_subj_pred(i,j,tt) = sum(tr_kappa>uniq_vals(tt)&tr_kappa<=uniq_vals(tt+1));
+    end
+    hold on;
+    err = sqrt(squeeze(subj_resp_pred(i,j,:)).*(1-squeeze(subj_resp_pred(i,j,:)))./squeeze(ntrial_subj(i,j,:)));
+    errorbar(vals,squeeze(subj_resp_pred(i,j,:)),err,'-or','Linewidth',2);
+    yline(0.5,'--k');
+    xline(0.0,'--k');
+    xlabel('Signed Kappa');
+    ylabel('Percent chose left');
+    xlim([-0.8 0.8])
+    ylim([0.0 1.0])
+end
+sgtitle('Response predicted by fitted weights to real data for peripheral stimuli','fontsize',30);
+
 %%
 bin_num = 15;
 figure();
@@ -200,7 +268,7 @@ for sub=1:num_sub
     subplot(2,5,sub)
     %     llo = llo( ~any( isnan( llo ) | isinf( llo ), 2 ),: );
     [sorted_llo,order_llo] = sort(log_bernoulli_sub{sub,2});
-    choice_used =  data_sub{sub,2}.choice(order_llo);
+    choice_used = data_sub{sub,2}.choice(order_llo);
     bin_edges = linspace(min(sorted_llo),max(sorted_llo),bin_num+1);
     for bn=1:length(bin_edges)-1
         llo_mean(bn) = mean(sorted_llo(sorted_llo>=bin_edges(bn) & sorted_llo<=bin_edges(bn+1)));

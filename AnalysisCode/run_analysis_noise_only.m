@@ -38,7 +38,7 @@ else
     save(filename, 'frame_signals');
 end
 mark_half = floor(length(data.choice)/2);
-
+data.ideal_frame_signals = frame_signals;
 for k = 1:length(data.choice)
     noises = [noises data.noise(k)];
     signal_raw = [signal_raw; frame_signals(k, :)];

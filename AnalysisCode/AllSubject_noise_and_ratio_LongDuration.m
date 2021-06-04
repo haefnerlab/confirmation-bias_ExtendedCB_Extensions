@@ -138,7 +138,7 @@ for i=1:(num_sub)
             
         end
     end
-    sgtitle(['Top Row: Noise and Bottom Row: Longer Frames for Subject ' num2str(i)])
+    sgtitle(['Top Row: Noise and Bottom Row: Longer Frames for Subject ' num2str(i)],'fontsize',30);
 end
 
 %%

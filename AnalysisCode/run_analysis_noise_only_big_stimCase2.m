@@ -27,6 +27,7 @@ else
     [frame_signals] = ComputeFrameSignals_bigstimCase2(data, image_array_pre, ratios, contrasts, trial_types);
     save(filename, 'frame_signals');
 end
+data.ideal_frame_signals = frame_signals;
 for k = 1:length(data.choice)
     noises = [noises data.noise(k)];
     signal_raw = [signal_raw; frame_signals(k, :)];

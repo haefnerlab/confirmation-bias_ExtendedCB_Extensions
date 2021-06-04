@@ -32,7 +32,7 @@ for k = 1:length(data.choice)
     signal_raw = [signal_raw; frame_signals(k, :)];
     choice_raw = [choice_raw data.choice(k)];
 end
-
+data.ideal_frame_signals = frame_signals;
 trials = size(choice_raw, 2);
 disp('Preprocessing of data completed!');
 for j = 1:boot_n
