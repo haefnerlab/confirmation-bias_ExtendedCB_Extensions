@@ -1,0 +1,9 @@
+clear all;close all;clc;
+% AllSubject_short_long_frames.m;
+% AllSubject_noise_and_ratio_LongDuration.m;
+% AllSubject_fovea_periphery_stimulus_FinalEyeTracked.m;
+AllSubject_fovea_periphery_Case1;
+AllSubject_fovea_periphery_Case2;
+AllSubject_small_big_stimulus_ShortDuration;
+AllSubject_small_big_stimulus_ShortDuration_Case2;
+AllSubject_normal_wedge_stimulus;
