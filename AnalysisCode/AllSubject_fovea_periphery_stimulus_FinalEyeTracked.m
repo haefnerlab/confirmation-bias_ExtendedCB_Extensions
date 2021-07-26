@@ -1,7 +1,7 @@
 clear all;close all;clc;
 boots = 500;
 bins = 15;
-hpr_ridge = logspace(-1, 5, 7);
+hpr_ridge = 0.0;%logspace(-1, 5, 7);
 hpr_ar1 = 0.0;
 hpr_curvature = logspace(-1, 5, 7);
 standardize = 0;
@@ -864,7 +864,7 @@ set(ax, 'box','off');
 ax.XAxis.FontSize = 20;
 ax.YAxis.FontSize = 20;
 
-subaxis(2,3,2, 'Spacing', 0.025, 'Padding', 0.025, 'Margin', 0.075);
+subaxis(2,3,4, 'Spacing', 0.025, 'Padding', 0.025, 'Margin', 0.075);
 for sb=1:num_sub
     mn1(sb) = mean(squeeze(thresh(sb,1,:)));
     mn2(sb) = mean(squeeze(thresh(sb,2,:)));
@@ -906,7 +906,7 @@ set(ax, 'box','off');
 ax.XAxis.FontSize = 20;
 ax.YAxis.FontSize = 20;
 
-subaxis(2,3,3, 'Spacing', 0.025, 'Padding', 0.025, 'Margin', 0.075);
+subaxis(2,3,5, 'Spacing', 0.025, 'Padding', 0.025, 'Margin', 0.075);
 scatter(norm_slope(:,1),norm_slope(:,2),50,'k','filled');
 for sb=1:num_sub
     mn1(sb) = mean(squeeze(norm_slope_all(sb,1,:)));
@@ -932,6 +932,11 @@ scatter(norm_slope(:,1),norm_slope(:,2),50,'k','filled')
 mn_slp1 = ((1./v1)./sum(1./v1)) .* norm_slope(:,1)';
 mn_slp2 = ((1./v2)./sum(1./v2)) .* norm_slope(:,2)';
 scatter(sum(mn_slp1),sum(mn_slp2),200,'r','filled');
+% hold on;
+% errorbar(sum(mn_slp1,2),sum(mn_slp2,2),2*std(mn1)/sqrt(num_sub), 'horizontal', 'LineStyle', 'none','color', 'r','linewidth',1.5);
+% hold on;
+% errorbar(sum(mn_slp1,2),sum(mn_slp2,2),2*std(mn2)/sqrt(num_sub), 'vertical', 'LineStyle', 'none','color', 'r','linewidth',1.5);
+% hold on;
 xlabel('Slopes for Foveal Stimulus ','FontSize',20);
 ylabel('Slopes for Peripheral Stimulus','FontSize',20);
 hold('on');
@@ -950,6 +955,50 @@ ax.XAxis.FontSize = 20;
 ax.YAxis.FontSize = 20;
 
 subaxis(2,3,6, 'Spacing', 0.025, 'Padding', 0.025, 'Margin', 0.075);
+scatter(beta(:,1),beta(:,2),'k','filled');
+for sb=1:num_sub
+    mn1(sb) = mean(squeeze(beta_all(sb,1,:)));
+    mn2(sb) = mean(squeeze(beta_all(sb,2,:)));
+    v1(sb) = (std(squeeze(beta_all(sb,1,:)))/sqrt(size(beta_all,3)))^2;%var(squeeze(norm_slope_all(sb,1,:)));
+    v2(sb) = (std(squeeze(beta_all(sb,2,:)))/sqrt(size(beta_all,3)))^2;%var(squeeze(norm_slope_all(sb,2,:)));
+    l1(sb) = prctile(squeeze(beta_all(sb,1,:)),50)-prctile(squeeze(beta_all(sb,1,:)),16);
+    h1(sb) = prctile(squeeze(beta_all(sb,1,:)),84)-prctile(squeeze(beta_all(sb,1,:)),50);
+    l2(sb) = prctile(squeeze(beta_all(sb,2,:)),50)-prctile(squeeze(beta_all(sb,2,:)),16);
+    h2(sb) = prctile(squeeze(beta_all(sb,2,:)),84)-prctile(squeeze(beta_all(sb,2,:)),50);
+end
+hold on;
+eb(1) = errorbar(beta(:,1),beta(:,2),l1,h1, 'horizontal', 'LineStyle', 'none');
+hold on;
+eb(2) = errorbar(beta(:,1),beta(:,2),l2,h2, 'vertical', 'LineStyle', 'none');
+set(eb(1), 'color', 'b', 'LineWidth', 2)
+set(eb(2), 'color', 'g', 'LineWidth', 2)
+mn_b = min(min(beta));
+mx_b = max(max(beta));
+hold on;
+plot(linspace(mn_b,mx_b,10),linspace(mn_b,mx_b,10),'k','LineWidth',2);
+hold on;
+scatter(beta(:,1),beta(:,2),50,'k','filled')
+mn_slp1 = ((1./v1)./sum(1./v1)) .* beta(:,1)';
+mn_slp2 = ((1./v2)./sum(1./v2)) .* beta(:,2)';
+scatter(sum(mn_slp1),sum(mn_slp2),200,'r','filled');
+xlabel('Beta for Foveal Stimulus ');
+ylabel('Beta for Peripheral Stimulus');
+hold('on');
+hold('on');
+axis('tight');
+xticks([-0.75 : 0.25:0.2])
+yticks([-0.75 : 0.25:0.2])
+a = get(gca,'XTickLabel');
+set(gca,'fontsize',18)
+b = get(gca,'YTickLabel');
+set(gca,'fontsize',18)
+ax = gca;
+ax.LineWidth=2;
+set(ax, 'box','off');
+ax.XAxis.FontSize = 20;
+ax.YAxis.FontSize = 20;
+
+subaxis(2,3,2, 'Spacing', 0.025, 'Padding', 0.025, 'Margin', 0.075);
 for i=1:(num_sub)
     plot(vals,squeeze(subj_resp_pred(i,1,:)),'b','Linewidth',0.2);
     hold('on');
@@ -967,7 +1016,7 @@ set(ax, 'box','off');
 ax.XAxis.FontSize = 20;
 ax.YAxis.FontSize = 20;
 
-subaxis(2,3,5, 'Spacing', 0.025, 'Padding', 0.025, 'Margin', 0.075);
+subaxis(2,3,3, 'Spacing', 0.025, 'Padding', 0.025, 'Margin', 0.075);
 for i=1:(num_sub)
     plot(vals,squeeze(subj_resp_pred(i,2,:)),'g','Linewidth',0.2);
     hold('on');
@@ -985,7 +1034,6 @@ ax.LineWidth=2;
 set(ax, 'box','off');
 ax.XAxis.FontSize = 20;
 ax.YAxis.FontSize = 20;
-
 
 
 %%

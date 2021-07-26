@@ -1,7 +1,7 @@
 clear all; close all; clc;
 boots = 500;
 bins = 15;
-hpr_ridge = logspace(-1, 5, 7);
+hpr_ridge = 0.0;%logspace(-1, 5, 7);
 hpr_ar1 = 0.0;
 hpr_curvature = logspace(-1, 5, 7);
 num_frames = 10;

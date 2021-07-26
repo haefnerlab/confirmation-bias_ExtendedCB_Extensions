@@ -47,6 +47,7 @@ avg_ll =  mean(log_likelihood_summed,1);
 % iRidge = max(iRidge-1, 1);
 % iAR1 = max(iAR1-1, 1);
 % iCurve = max(iCurve-1, 1);
+
 best_hprs = [hpr_ridge(iRidge), hpr_ar1(iAR1), hpr_curvature(iCurve)];
 disp('Searching of hyperparameters complete!!');
 disp (['Best hyperparameters across subjects for peripheral stimulus is: ' num2str(best_hprs)]);
